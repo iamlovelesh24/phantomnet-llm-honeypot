@@ -11,6 +11,7 @@ Week 1 scope:
 
 import errno
 import os
+from deception.file_generator import FileGenerator
 
 try:
     from fuse import FUSE, Operations
@@ -23,6 +24,8 @@ except OSError:
 
 class PhantomNetFS(Operations):
     """Minimal PhantomNet filesystem for the Week 1 prototype."""
+    def __init__(self):
+        self.generator = FileGenerator()
 
     DIRECTORIES = {
         "/": ["HR", "Finance", "Engineering", "Mail"],
@@ -48,6 +51,21 @@ class PhantomNetFS(Operations):
         ],
     }
 
+    def open(self, path, flags):
+        """Allow read-only access to synthetic files."""
+        if not self._is_file(path):
+            raise OSError(errno.ENOENT, "No such file")
+
+        return 0
+
+    def read(self, path, size, offset, fh):
+        """Generate and return synthetic file content on demand."""
+        if not self._is_file(path):
+            raise OSError(errno.ENOENT, "No such file")
+
+        generated = self.generator.generate(path)
+
+        return generated.content[offset:offset + size].encode("utf-8")
     def getattr(self, path, fh=None):
         """Return basic filesystem metadata."""
         if path == "/" or self._is_directory(path):
@@ -60,7 +78,7 @@ class PhantomNetFS(Operations):
             return {
                 "st_mode": 0o644 | 0o100000,
                 "st_nlink": 1,
-                "st_size": 0,
+                "st_size": len(self.generator.generate(path).content),
             }
 
         raise OSError(errno.ENOENT, "No such file or directory")
@@ -99,7 +117,7 @@ if __name__ == "__main__":
         print("FUSE runtime is unavailable on this system.")
         print("PhantomNet Week 1 filesystem logic can still be tested.")
     else:
-        mount_point = "./phantomnet_mount"
+        mount_point = os.path.expanduser("~/phantomnet_mount")
 
         os.makedirs(mount_point, exist_ok=True)
 
