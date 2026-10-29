@@ -1,17 +1,20 @@
 """
 PhantomNet Generative FUSE Filesystem
-Member 2 - Week 1
+Member 2 - Week 2
 
-Week 1 scope:
-- Create an isolated virtual filesystem
-- Support directory listing
-- Provide realistic synthetic directories/files
-- No cat/file-content generation yet
+Current scope:
+- Isolated virtual filesystem
+- Synthetic directory and file generation
+- On-demand synthetic file content
+- Path validation and sandbox protection
+- Read-only deception filesystem behavior
 """
 
 import errno
 import os
 from deception.file_generator import FileGenerator
+from deception.path_guard import PathGuard
+from deception.scenarios import get_scenario
 
 try:
     from fuse import FUSE, Operations
@@ -23,12 +26,13 @@ except OSError:
 
 
 class PhantomNetFS(Operations):
-    """Minimal PhantomNet filesystem for the Week 1 prototype."""
+    """PhantomNet read-only generative deception filesystem."""
     def __init__(self):
         self.generator = FileGenerator()
+        self.path_guard = PathGuard("/tmp/phantomnet")
 
     DIRECTORIES = {
-        "/": ["HR", "Finance", "Engineering", "Mail"],
+        "/": ["HR", "Finance", "Engineering", "Mail", "secret_keys.txt"],
         "/HR": [
             "employees.txt",
             "org_chart.txt",
@@ -51,8 +55,21 @@ class PhantomNetFS(Operations):
         ],
     }
 
+    def _validate_path(self, path):
+        """Validate a virtual FUSE path against the PhantomNet sandbox."""
+        try:
+            virtual_path = str(path).lstrip("/")
+            self.path_guard.resolve(virtual_path)
+        except PermissionError as exc:
+            raise OSError(errno.EACCES, str(exc)) from exc
+
     def open(self, path, flags):
         """Allow read-only access to synthetic files."""
+        self._validate_path(path)
+
+        if (flags & os.O_ACCMODE) != os.O_RDONLY:
+            raise OSError(errno.EACCES, "PhantomNet filesystem is read-only")
+
         if not self._is_file(path):
             raise OSError(errno.ENOENT, "No such file")
 
@@ -60,8 +77,14 @@ class PhantomNetFS(Operations):
 
     def read(self, path, size, offset, fh):
         """Generate and return synthetic file content on demand."""
+        self._validate_path(path)
         if not self._is_file(path):
             raise OSError(errno.ENOENT, "No such file")
+
+        scenario = get_scenario(path.lstrip("/"))
+
+        if scenario is not None:
+            return scenario[offset:offset + size].encode("utf-8")
 
         generated = self.generator.generate(path)
 
@@ -75,10 +98,19 @@ class PhantomNetFS(Operations):
             }
 
         if self._is_file(path):
+            scenario = get_scenario(path.lstrip("/"))
+            content = (
+                scenario
+                if scenario is not None
+                else self.generator.generate(path).content
+            )
+
             return {
                 "st_mode": 0o644 | 0o100000,
                 "st_nlink": 1,
-                "st_size": len(self.generator.generate(path).content),
+                "st_size": len(content),
+                "st_uid": os.getuid(),
+                "st_gid": os.getgid(),
             }
 
         raise OSError(errno.ENOENT, "No such file or directory")

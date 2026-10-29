@@ -18,6 +18,7 @@ class GeneratedFile:
 
     path: str
     content: str
+    file_id: str
 
 
 class FileGenerator:
@@ -69,13 +70,14 @@ class FileGenerator:
         ).hexdigest()[:12]
 
         filename = path.rsplit("/", 1)[-1]
+        file_id = f"PN-{seed.upper()}"
 
         content = (
             f"PHANTOMNET SYNTHETIC FILE\n"
             f"==========================\n"
             f"Session: {self.session_id}\n"
             f"File: {filename}\n"
-            f"Reference: PN-{seed.upper()}\n\n"
+            f"Reference: {file_id}\n\n"
             f"This content is synthetic and exists only inside the "
             f"PhantomNet deception environment.\n\n"
             f"Generated record:\n"
@@ -87,6 +89,7 @@ class FileGenerator:
         generated = GeneratedFile(
             path=path,
             content=content,
+            file_id=file_id,
         )
 
         self._cache[path] = generated
