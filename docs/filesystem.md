@@ -79,8 +79,7 @@ for each of the two files below.
 | Minimum | 0.354 ms | 0.353 ms |
 | Maximum | 0.644 ms | 0.794 ms |
 
-The measured average read latency was below 500 ms for both files. The P95
-results were slightly above 500 ms.
+Both average and P95 read latencies were below the project's 500 ms target in this local benchmark. The P95 values were 0.523 ms for the HR file and 0.505 ms for secret_keys.txt.
 
 These measurements represent warmed, mounted-file reads. Operating-system
 caching can affect results; the benchmark does not measure cold reads, live
