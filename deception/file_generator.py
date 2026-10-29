@@ -79,11 +79,11 @@ class FileGenerator:
 
         try:
             self._ollama_timeout = min(
-                max(float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "1")), 0.1),
-                3.0,
+                max(float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "30")), 0.1),
+                60.0,
             )
         except ValueError:
-            self._ollama_timeout = 1.0
+            self._ollama_timeout = 30.0
 
     def list_files(self, directory: str) -> list[str]:
         """Return validated, cached filenames with predefined fallback."""
@@ -141,9 +141,13 @@ class FileGenerator:
             "Generate exactly three additional fictional corporate document "
             "filenames for a cybersecurity deception filesystem. "
             f"Department: {directory}. Existing filenames: {existing}. "
-            "Return only a JSON array of simple .txt filenames. "
-            "Do not include paths, directories, credentials, passwords, "
-            "API keys, or Markdown."
+            "Return exactly one JSON object with a single key named "
+            '"filenames", whose value is an array of three strings. '
+            'Example: {"filenames":["leave_policy.txt",'
+            '"recruitment_plan.txt","training_records.txt"]}. '
+            "Every filename MUST end in .txt. Use only letters, numbers, "
+            "underscores, and hyphens before .txt. Do not return PDF, DOCX, "
+            "QMD, paths, credentials, passwords, API keys, or Markdown."
         )
 
         payload = {
