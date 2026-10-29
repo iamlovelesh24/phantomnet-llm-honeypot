@@ -116,32 +116,43 @@ class PhantomNetFS(Operations):
         raise OSError(errno.ENOENT, "No such file or directory")
 
     def readdir(self, path, fh):
-        """Return directory entries for ls."""
+        """Return safe, cached filenames for directory listings."""
         if path not in self.DIRECTORIES:
             raise OSError(errno.ENOENT, "No such directory")
 
         yield "."
         yield ".."
 
-        for name in self.DIRECTORIES[path]:
+        if path == "/":
+            for name in self.DIRECTORIES["/"]:
+                yield name
+            return
+
+        directory = path.strip("/")
+        for name in self.generator.list_files(directory):
             yield name
 
     def _is_directory(self, path):
         return path in self.DIRECTORIES
 
     def _is_file(self, path):
-        for directory, files in self.DIRECTORIES.items():
-            for filename in files:
-                expected_path = (
-                    f"/{filename}"
-                    if directory == "/"
-                    else f"{directory}/{filename}"
-                )
+        """Recognize predefined and validated generated synthetic files."""
+        if path == "/secret_keys.txt":
+            return True
 
-                if path == expected_path:
-                    return True
+        if not isinstance(path, str) or not path.startswith("/"):
+            return False
 
-        return False
+        parts = path.strip("/").split("/")
+        if len(parts) != 2:
+            return False
+
+        directory, filename = parts
+
+        if directory not in self.generator.DIRECTORIES:
+            return False
+
+        return filename in self.generator.list_files(directory)
 
 
 if __name__ == "__main__":

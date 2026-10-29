@@ -121,3 +121,88 @@ def test_secret_keys_metadata_reports_correct_size(fs):
 
     assert content is not None
     assert metadata["st_size"] == len(content)
+
+
+def test_ollama_filenames_are_added_and_cached(monkeypatch):
+    from deception.file_generator import FileGenerator
+
+    generator = FileGenerator()
+    calls = []
+
+    def fake_request(directory):
+        calls.append(directory)
+        return ["security_review.txt", "training_plan.txt"]
+
+    monkeypatch.setattr(generator, "_request_ollama_filenames", fake_request)
+
+    first = generator.list_files("HR")
+    second = generator.list_files("HR")
+
+    assert "employees.txt" in first
+    assert "security_review.txt" in first
+    assert "training_plan.txt" in first
+    assert first == second
+    assert calls == ["HR"]
+
+
+def test_unsafe_ollama_filenames_are_rejected(monkeypatch):
+    from deception.file_generator import FileGenerator
+
+    generator = FileGenerator()
+
+    monkeypatch.setattr(
+        generator,
+        "_request_ollama_filenames",
+        lambda directory: [
+            "../escape.txt",
+            "Finance/budget.txt",
+            "secret_keys.txt",
+            "api_keys.txt",
+            "readme.md",
+            "audit_summary.txt",
+        ],
+    )
+
+    files = generator.list_files("HR")
+
+    assert "audit_summary.txt" in files
+    assert "../escape.txt" not in files
+    assert "Finance/budget.txt" not in files
+    assert "secret_keys.txt" not in files
+    assert "api_keys.txt" not in files
+    assert "readme.md" not in files
+
+
+def test_ollama_failure_uses_predefined_filenames(monkeypatch):
+    from deception.file_generator import FileGenerator
+
+    generator = FileGenerator()
+
+    def fail_request(directory):
+        raise OSError("Ollama unavailable")
+
+    monkeypatch.setattr(generator, "_request_ollama_filenames", fail_request)
+
+    files = generator.list_files("HR")
+
+    assert files == generator.DIRECTORIES["HR"]
+    assert generator.list_files("HR") == files
+    assert generator._ollama_available is False
+
+
+def test_fuse_readdir_exposes_generated_filename(fs, monkeypatch):
+    monkeypatch.setattr(
+        fs.generator,
+        "_request_ollama_filenames",
+        lambda directory: ["incident_response.txt"],
+    )
+
+    entries = list(fs.readdir("/HR", None))
+
+    assert "incident_response.txt" in entries
+    assert fs._is_file("/HR/incident_response.txt")
+
+    content = fs.read("/HR/incident_response.txt", 1000, 0, 0)
+
+    assert b"PHANTOMNET SYNTHETIC FILE" in content
+    assert b"incident_response.txt" in content
