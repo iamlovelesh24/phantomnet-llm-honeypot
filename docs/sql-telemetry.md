@@ -79,3 +79,9 @@ SQL is validated before execution and unsupported or destructive statements are 
 The mock database contains synthetic employees, payroll, departments, projects, and tickets data.
 Returned rows are deterministic-looking demonstration data and must not represent real employees or customers.
 No production database connection is required or permitted.
+
+## SQL Safety Controls
+
+Destructive SQL such as DELETE, UPDATE, DROP, ALTER, TRUNCATE, INSERT, and similar unsupported operations is rejected.
+Unknown tables and columns are rejected instead of being passed through.
+This boundary keeps the SQL component isolated from real corporate data.
