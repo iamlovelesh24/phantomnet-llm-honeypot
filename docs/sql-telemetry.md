@@ -124,3 +124,8 @@ No production database connection is required or permitted.
 Destructive SQL is rejected.
 Unknown tables and columns are rejected.
 The SQL component remains isolated from real corporate data.
+
+## Context Continuity
+ContextStore provides session-aware storage and retrieval of generated facts.
+Retrieved facts use structured results.
+Context retention follows the agreed ten-minute demonstration window.
