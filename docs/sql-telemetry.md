@@ -67,3 +67,9 @@ All data is synthetic.
 
 No real employee, customer, corporate, or production
 database should be connected to this component.
+
+## SQL Contract
+
+Member 3 exposes a controlled PostgreSQL-style mock SQL interface.
+Supported operations are read-only SELECT queries against synthetic schemas.
+SQL is validated before execution and unsupported or destructive statements are blocked.
