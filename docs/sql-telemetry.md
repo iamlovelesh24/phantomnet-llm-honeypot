@@ -97,3 +97,9 @@ Context retention is bounded to the agreed ten-minute demonstration window.
 Context records are associated with a session identifier.
 Facts from one session must not leak into another session.
 Session isolation is covered by the Member 3 test suite.
+
+## Telemetry Event Contract
+
+Telemetry records include event ID, session ID, timestamp, event type, action, scenario, risk level, risk score, and metadata.
+Events are persisted through the telemetry service for downstream dashboard consumption.
+The telemetry interface is designed for clean handoff to Member 4.
