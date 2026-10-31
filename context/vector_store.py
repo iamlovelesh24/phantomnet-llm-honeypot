@@ -1,142 +1,146 @@
 """
 PhantomNet context store.
 
-Provides session-scoped synthetic fact storage using SQLite.
-Designed for defensive cyber-deception research only.
+Provides short-lived session context persistence using SQLite.
+All data is synthetic and intended for isolated defensive research.
 """
 
 import sqlite3
+import time
 from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Optional
 
 
 class ContextStore:
-    """SQLite-backed context store with safe connection handling."""
-
-    def __init__(self, db_path: Optional[str] = None):
-        if db_path is None:
-            db_path = "context.db"
-
-        self.db_path = Path(db_path)
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+    def __init__(self, db_path=None, ttl_seconds=600):
+        self.db_path = Path(db_path or "context.db")
+        self.ttl_seconds = ttl_seconds
         self._initialize()
 
     def _connect(self):
-        """Create a short-lived SQLite connection."""
-        return sqlite3.connect(str(self.db_path))
+        connection = sqlite3.connect(
+            str(self.db_path),
+            timeout=5,
+        )
+        connection.row_factory = sqlite3.Row
+        return connection
 
     def _initialize(self):
-        """Create the context table."""
-        with self._connect() as conn:
-            conn.execute(
+        connection = self._connect()
+        try:
+            connection.execute(
                 """
                 CREATE TABLE IF NOT EXISTS context_facts (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     session_id TEXT NOT NULL,
                     fact TEXT NOT NULL,
-                    created_at TEXT NOT NULL
+                    created_at REAL NOT NULL
                 )
                 """
             )
-            conn.commit()
-
-    def add_fact(self, session_id: str, fact: str) -> dict:
-        """Store a synthetic fact for a session."""
-        timestamp = datetime.utcnow().isoformat()
-
-        with self._connect() as conn:
-            cursor = conn.execute(
+            connection.execute(
                 """
-                INSERT INTO context_facts
-                (session_id, fact, created_at)
+                CREATE INDEX IF NOT EXISTS idx_context_session
+                ON context_facts(session_id)
+                """
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+    def add_fact(self, session_id, fact):
+        connection = self._connect()
+        try:
+            now = time.time()
+
+            connection.execute(
+                """
+                DELETE FROM context_facts
+                WHERE created_at < ?
+                """,
+                (now - self.ttl_seconds,),
+            )
+
+            connection.execute(
+                """
+                INSERT INTO context_facts(session_id, fact, created_at)
                 VALUES (?, ?, ?)
                 """,
-                (session_id, fact, timestamp),
+                (session_id, fact, now),
             )
-            conn.commit()
+
+            connection.commit()
 
             return {
                 "success": True,
-                "id": cursor.lastrowid,
                 "session_id": session_id,
                 "fact": fact,
-                "created_at": timestamp,
             }
+        finally:
+            connection.close()
 
-    def retrieve(
-        self,
-        session_id: str,
-        query: str,
-        max_age_minutes: int = 10,
-    ) -> list:
-        """Retrieve recent facts for a session matching the query."""
-        cutoff = datetime.utcnow() - timedelta(minutes=max_age_minutes)
+    def retrieve(self, session_id, query=None):
+        connection = self._connect()
+        try:
+            now = time.time()
 
-        with self._connect() as conn:
-            rows = conn.execute(
+            connection.execute(
                 """
-                SELECT id, session_id, fact, created_at
-                FROM context_facts
-                WHERE session_id = ?
-                  AND created_at >= ?
-                  AND LOWER(fact) LIKE ?
-                ORDER BY id DESC
+                DELETE FROM context_facts
+                WHERE created_at < ?
                 """,
-                (
-                    session_id,
-                    cutoff.isoformat(),
-                    "%" + query.lower() + "%",
-                ),
-            ).fetchall()
+                (now - self.ttl_seconds,),
+            )
+            connection.commit()
 
-        return [
-            {
-                "id": row[0],
-                "session_id": row[1],
-                "fact": row[2],
-                "created_at": row[3],
-            }
-            for row in rows
-        ]
-
-    def get_session_facts(self, session_id: str) -> list:
-        """Return all facts for a session."""
-        with self._connect() as conn:
-            rows = conn.execute(
+            rows = connection.execute(
                 """
-                SELECT id, session_id, fact, created_at
+                SELECT fact
                 FROM context_facts
                 WHERE session_id = ?
-                ORDER BY id
+                ORDER BY id ASC
                 """,
                 (session_id,),
             ).fetchall()
 
-        return [
-            {
-                "id": row[0],
-                "session_id": row[1],
-                "fact": row[2],
-                "created_at": row[3],
+            facts = [row["fact"] for row in rows]
+
+            if query:
+                query_lower = query.lower()
+                matching = [
+                    fact
+                    for fact in facts
+                    if query_lower in fact.lower()
+                ]
+
+                if matching:
+                    facts = matching
+
+            return facts
+        finally:
+            connection.close()
+
+    def status(self):
+        connection = self._connect()
+        try:
+            count = connection.execute(
+                "SELECT COUNT(*) AS count FROM context_facts"
+            ).fetchone()["count"]
+
+            return {
+                "backend": "sqlite",
+                "database": str(self.db_path),
+                "ttl_seconds": self.ttl_seconds,
+                "fact_count": count,
+                "healthy": True,
             }
-            for row in rows
-        ]
-
-    def status(self) -> dict:
-        """Return context store health information."""
-        with self._connect() as conn:
-            count = conn.execute(
-                "SELECT COUNT(*) FROM context_facts"
-            ).fetchone()[0]
-
-        return {
-            "status": "ok",
-            "backend": "sqlite",
-            "database": str(self.db_path),
-            "fact_count": count,
-        }
+        finally:
+            connection.close()
 
     def close(self):
-        """Compatibility method; connections are short-lived."""
+        """
+        Compatibility method.
+
+        Connections are intentionally short-lived, so there is
+        no persistent connection to close.
+        """
         return None

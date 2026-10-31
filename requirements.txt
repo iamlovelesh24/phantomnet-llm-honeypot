@@ -1,0 +1,3 @@
+# Optional vector-store integration.
+# SQLite is the guaranteed local fallback.
+chromadb>=1.0.0

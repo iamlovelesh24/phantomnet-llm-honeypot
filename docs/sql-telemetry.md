@@ -1,0 +1,69 @@
+# PhantomNet Member 3 — SQL, Context & Telemetry
+
+## Scope
+
+Member 3 provides the controlled synthetic SQL deception
+layer, persistent context storage, and telemetry handoff
+service.
+
+## SQL Engine
+
+Supported synthetic schemas:
+
+- employees
+- payroll
+- departments
+- projects
+- tickets
+
+Only read-only SELECT queries are accepted.
+
+Destructive operations such as DROP, DELETE, UPDATE,
+INSERT, ALTER, and TRUNCATE are blocked.
+
+No real corporate or production database is contacted.
+
+## Context Store
+
+The context service stores synthetic generated facts by
+session.
+
+The active context window is 10 minutes / 600 seconds.
+
+SQLite provides reliable local persistence.
+
+ChromaDB availability is detected when installed and usable.
+
+## Telemetry
+
+Telemetry records include:
+
+- session ID
+- timestamp
+- event type
+- action/query
+- response metadata
+- module
+- behavior indicators
+- scenario
+- risk level
+- risk score
+
+The persistent SQLite service exposes record_event()
+and get_events() for downstream dashboard integration.
+
+## Testing
+
+Run:
+
+python -m unittest discover -s tests -v
+
+## Safety Boundary
+
+This implementation is for authorized defensive research
+and isolated demonstration environments only.
+
+All data is synthetic.
+
+No real employee, customer, corporate, or production
+database should be connected to this component.
