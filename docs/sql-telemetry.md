@@ -85,3 +85,9 @@ No production database connection is required or permitted.
 Destructive SQL such as DELETE, UPDATE, DROP, ALTER, TRUNCATE, INSERT, and similar unsupported operations is rejected.
 Unknown tables and columns are rejected instead of being passed through.
 This boundary keeps the SQL component isolated from real corporate data.
+
+## Context Continuity
+
+ContextStore provides session-aware storage and retrieval of generated facts.
+Retrieved facts use structured results so downstream modules can consume context consistently.
+Context retention is bounded to the agreed ten-minute demonstration window.
