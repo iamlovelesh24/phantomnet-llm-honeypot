@@ -139,3 +139,8 @@ Session isolation is covered by the Member 3 test suite.
 Telemetry records include event ID, session ID, timestamp, event type, action, scenario, risk level, risk score, and metadata.
 Events are persisted for downstream dashboard consumption.
 The telemetry interface is designed for handoff to Member 4.
+
+## Member 4 Handoff
+Member 4 can consume the SQL, context, and telemetry interfaces without connecting to a real database.
+The Member 3 verification suite covers SQL, safety, context continuity, and session isolation.
+All Member 3 tests must pass before integration.
