@@ -115,7 +115,7 @@ class ContextStore:
                 if matching:
                     facts = matching
 
-            return facts
+            return [{"fact": fact} for fact in facts]
         finally:
             connection.close()
 
