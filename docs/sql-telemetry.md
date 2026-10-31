@@ -91,3 +91,9 @@ This boundary keeps the SQL component isolated from real corporate data.
 ContextStore provides session-aware storage and retrieval of generated facts.
 Retrieved facts use structured results so downstream modules can consume context consistently.
 Context retention is bounded to the agreed ten-minute demonstration window.
+
+## Session Isolation
+
+Context records are associated with a session identifier.
+Facts from one session must not leak into another session.
+Session isolation is covered by the Member 3 test suite.
