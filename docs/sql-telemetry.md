@@ -109,3 +109,8 @@ The telemetry interface is designed for clean handoff to Member 4.
 Member 4 can consume the SQL, context, and telemetry interfaces without connecting to a real database.
 The Member 3 verification suite currently covers schema discovery, SELECT queries, WHERE filtering, invalid tables, invalid columns, destructive SQL blocking, LLM request construction, ten-minute context, and session isolation.
 All Member 3 test cases must pass before integration.
+
+## SQL Contract
+Member 3 exposes a controlled PostgreSQL-style mock SQL interface.
+Supported operations are read-only SELECT queries against synthetic schemas.
+SQL is validated before execution and unsupported or destructive statements are blocked.
