@@ -67,7 +67,7 @@ class PhantomNetFS(Operations):
         """Allow read-only access to synthetic files."""
         self._validate_path(path)
 
-        if (flags & os.O_ACCMODE) != os.O_RDONLY:
+        if (flags & 3) != os.O_RDONLY:
             raise OSError(errno.EACCES, "PhantomNet filesystem is read-only")
 
         if not self._is_file(path):
@@ -109,8 +109,8 @@ class PhantomNetFS(Operations):
                 "st_mode": 0o644 | 0o100000,
                 "st_nlink": 1,
                 "st_size": len(content),
-                "st_uid": os.getuid(),
-                "st_gid": os.getgid(),
+                "st_uid": getattr(os, "getuid", lambda: 0)(),
+                "st_gid": getattr(os, "getgid", lambda: 0)(),
             }
 
         raise OSError(errno.ENOENT, "No such file or directory")
