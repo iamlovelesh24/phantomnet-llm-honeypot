@@ -206,3 +206,31 @@ def test_fuse_readdir_exposes_generated_filename(fs, monkeypatch):
 
     assert b"PHANTOMNET SYNTHETIC FILE" in content
     assert b"incident_response.txt" in content
+
+def test_llm_content_generation_uses_member1_context(monkeypatch):
+    from deception.file_generator import FileGenerator
+
+    generator = FileGenerator("w3-c2-test")
+    captured = {}
+
+    def fake_llm(prompt, system=None, context=None):
+        captured["prompt"] = prompt
+        captured["system"] = system
+        captured["context"] = context
+        return "NexusCore Technologies synthetic HR content."
+
+    monkeypatch.setattr(
+        "deception.file_generator.llm_generate",
+        fake_llm,
+    )
+    monkeypatch.setenv("PHANTOMNET_ENABLE_LLM_CONTENT", "true")
+
+    generated = generator.generate("/HR/employees.txt")
+
+    assert generated.content == "NexusCore Technologies synthetic HR content."
+    assert "employees.txt" in captured["prompt"]
+    assert captured["system"] is not None
+    assert captured["context"]["department"] == "HR"
+    assert captured["context"]["filename"] == "employees.txt"
+    assert captured["context"]["session_id"] == "w3-c2-test"
+
