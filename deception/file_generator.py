@@ -17,6 +17,45 @@ from typing import Dict
 from urllib.request import Request, urlopen
 from llm.model import generate as llm_generate
 from llm.prompts import FILESYSTEM_PROMPT, SYSTEM_PROMPT
+from llm.lore import EMPLOYEES, PROJECT_IDS
+from llm.guardrails import FORBIDDEN_REAL_DATA_TERMS
+
+
+def validate_generated_content(content: str) -> bool:
+    """Validate LLM-generated content against PhantomNet safety rules."""
+    if not isinstance(content, str) or not content.strip():
+        return False
+
+    normalized = content.casefold()
+
+    for term in FORBIDDEN_REAL_DATA_TERMS:
+        if term.casefold() in normalized:
+            return False
+
+    allowed_employee_ids = {
+        employee["employee_id"].casefold()
+        for employee in EMPLOYEES.values()
+    }
+
+    allowed_project_ids = {
+        project_id.casefold()
+        for project_id in PROJECT_IDS.values()
+    }
+
+    employee_ids = re.findall(
+        r"\bNC-EMP-\d+\b", content, flags=re.IGNORECASE
+    )
+    project_ids = re.findall(
+        r"\bNC-PRJ-\d+\b", content, flags=re.IGNORECASE
+    )
+
+    if any(value.casefold() not in allowed_employee_ids for value in employee_ids):
+        return False
+
+    if any(value.casefold() not in allowed_project_ids for value in project_ids):
+        return False
+
+    return True
 
 
 @dataclass(frozen=True)
@@ -242,7 +281,7 @@ class FileGenerator:
             try:
                 llm_content = self._generate_with_llm(path)
 
-                if llm_content and llm_content.strip():
+                if validate_generated_content(llm_content):
                     generated = GeneratedFile(
                         path=path,
                         content=llm_content,
