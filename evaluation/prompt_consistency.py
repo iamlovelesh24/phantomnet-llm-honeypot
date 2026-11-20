@@ -14,6 +14,11 @@ ALLOWED_EMPLOYEE_IDS = {
 
 ALLOWED_PROJECT_IDS = set(PROJECT_IDS.values())
 
+EMPLOYEE_ID_MAP = {
+    name: employee["employee_id"]
+    for name, employee in EMPLOYEES.items()
+}
+
 FORBIDDEN_TERMS = {
     "Alice Johnson",
     "Bob Smith",
@@ -31,14 +36,14 @@ def validate_output(output: str, project: str) -> tuple[bool, str]:
     if not isinstance(output, str) or not output.strip():
         return False, "Model returned empty or invalid output."
 
-    if project not in output:
+    if project.lower() not in output.lower():
         return False, f"Expected project name '{project}' was not preserved."
 
     for term in FORBIDDEN_TERMS:
         if term.lower() in output.lower():
             return False, f"Forbidden lore term detected: {term}"
 
-    # Validate every employee ID found in the output.
+    # Validate employee IDs.
     employee_ids = re.findall(
         r"\bNC-EMP-\d+\b",
         output,
@@ -49,7 +54,18 @@ def validate_output(output: str, project: str) -> tuple[bool, str]:
         if employee_id.upper() not in ALLOWED_EMPLOYEE_IDS:
             return False, f"Unapproved employee ID detected: {employee_id}"
 
-    # Validate project IDs against both the lore and requested project.
+    # Validate known employee name and ID consistency.
+    for employee_name, expected_id in EMPLOYEE_ID_MAP.items():
+        if employee_name.lower() in output.lower():
+            if employee_ids and expected_id not in [
+                employee_id.upper() for employee_id in employee_ids
+            ]:
+                return False, (
+                    f"Employee ID mismatch for {employee_name}: "
+                    f"expected {expected_id}."
+                )
+
+    # Validate project IDs.
     project_ids = re.findall(
         r"\bNC-PRJ-\d+\b",
         output,
@@ -72,12 +88,17 @@ def validate_output(output: str, project: str) -> tuple[bool, str]:
 
 
 def evaluate_project_consistency(project: str) -> tuple[bool, str]:
+    """Generate and validate content for a known PhantomNet project."""
+
     if project not in ALLOWED_PROJECTS:
         return False, f"Unknown project: {project}"
 
     prompt = CORPORATE_CONTENT_PROMPT.format(
         content_type="short internal project update",
-        context=f"Project {project} is active within NexusCore Technologies.",
+        context=(
+            f"Project {project} is active within NexusCore Technologies. "
+            f"Project description: {PROJECTS[project]}."
+        ),
     )
 
     output = generate(prompt, system=SYSTEM_PROMPT)
