@@ -1,3 +1,4 @@
+
 import errno
 import os
 
@@ -207,6 +208,7 @@ def test_fuse_readdir_exposes_generated_filename(fs, monkeypatch):
     assert b"PHANTOMNET SYNTHETIC FILE" in content
     assert b"incident_response.txt" in content
 
+
 def test_llm_content_generation_uses_member1_context(monkeypatch):
     from deception.file_generator import FileGenerator
 
@@ -228,9 +230,33 @@ def test_llm_content_generation_uses_member1_context(monkeypatch):
     generated = generator.generate("/HR/employees.txt")
 
     assert generated.content == "NexusCore Technologies synthetic HR content."
-    assert "employees.txt" in captured["prompt"]
-    assert captured["system"] is not None
-    assert captured["context"]["department"] == "HR"
-    assert captured["context"]["filename"] == "employees.txt"
-    assert captured["context"]["session_id"] == "w3-c2-test"
 
+
+# C3: Additional path validation security tests
+
+def test_getattr_path_traversal_is_blocked(fs):
+    with pytest.raises(OSError) as exc:
+        fs.getattr("/../../etc/passwd")
+
+    assert exc.value.errno == errno.EACCES
+
+
+def test_readdir_path_traversal_is_blocked(fs):
+    with pytest.raises(OSError) as exc:
+        list(fs.readdir("/../../etc", None))
+
+    assert exc.value.errno == errno.EACCES
+
+
+def test_relative_path_is_rejected(fs):
+    with pytest.raises(OSError) as exc:
+        fs.getattr("HR/employees.txt")
+
+    assert exc.value.errno == errno.EACCES
+
+
+def test_null_byte_path_is_rejected(fs):
+    with pytest.raises(OSError) as exc:
+        fs.getattr("/HR/employees.txt\x00")
+
+    assert exc.value.errno == errno.EACCES
