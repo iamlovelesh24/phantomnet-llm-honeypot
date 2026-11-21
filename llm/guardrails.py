@@ -1,3 +1,4 @@
+
 """
 PhantomNet LLM safety guardrails.
 
@@ -24,33 +25,34 @@ SAFETY_RULES = [
 ]
 
 
+def _contains_forbidden_term(text: str) -> bool:
+    """Check text for prohibited real-world data references."""
+    normalized = text.casefold()
+
+    return any(
+        term.casefold() in normalized
+        for term in FORBIDDEN_REAL_DATA_TERMS
+    )
+
+
 def validate_input(text: str) -> bool:
-    """
-    Check whether an input contains prohibited real-world data requests.
-    """
-    normalized = text.lower()
+    """Reject invalid or prohibited user prompts."""
+    if not isinstance(text, str) or not text.strip():
+        return False
 
-    for term in FORBIDDEN_REAL_DATA_TERMS:
-        if term in normalized:
-            return False
-
-    return True
+    return not _contains_forbidden_term(text)
 
 
 def validate_output(text: str) -> bool:
-    """
-    Basic validation for generated PhantomNet content.
-    """
-    if not text or not text.strip():
+    """Reject empty, invalid, or prohibited generated content."""
+    if not isinstance(text, str) or not text.strip():
         return False
 
-    return True
+    return not _contains_forbidden_term(text)
 
 
 def safety_message() -> str:
-    """
-    Return the standard PhantomNet safety message.
-    """
+    """Return the standard PhantomNet safety message."""
     return (
         "PhantomNet generates synthetic data only "
         "inside a controlled deception environment."
