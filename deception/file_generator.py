@@ -9,11 +9,53 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 import re
 from dataclasses import dataclass
 from hashlib import sha256
 from typing import Dict
 from urllib.request import Request, urlopen
+from llm.model import generate as llm_generate
+from llm.prompts import FILESYSTEM_PROMPT, SYSTEM_PROMPT
+from llm.lore import EMPLOYEES, PROJECT_IDS
+from llm.guardrails import FORBIDDEN_REAL_DATA_TERMS
+
+
+def validate_generated_content(content: str) -> bool:
+    """Validate LLM-generated content against PhantomNet safety rules."""
+    if not isinstance(content, str) or not content.strip():
+        return False
+
+    normalized = content.casefold()
+
+    for term in FORBIDDEN_REAL_DATA_TERMS:
+        if term.casefold() in normalized:
+            return False
+
+    allowed_employee_ids = {
+        employee["employee_id"].casefold()
+        for employee in EMPLOYEES.values()
+    }
+
+    allowed_project_ids = {
+        project_id.casefold()
+        for project_id in PROJECT_IDS.values()
+    }
+
+    employee_ids = re.findall(
+        r"\bNC-EMP-\d+\b", content, flags=re.IGNORECASE
+    )
+    project_ids = re.findall(
+        r"\bNC-PRJ-\d+\b", content, flags=re.IGNORECASE
+    )
+
+    if any(value.casefold() not in allowed_employee_ids for value in employee_ids):
+        return False
+
+    if any(value.casefold() not in allowed_project_ids for value in project_ids):
+        return False
+
+    return True
 
 
 @dataclass(frozen=True)
@@ -177,6 +219,33 @@ class FileGenerator:
 
         return parsed
 
+    def _generate_with_llm(self, path: str) -> str:
+        """Generate synthetic filesystem content through Member 1 LLM."""
+        filename = Path(path).name
+        department = self._department(path)
+
+        content_type = (
+            f"synthetic internal {department} file named {filename}"
+        )
+
+        prompt = FILESYSTEM_PROMPT.format(
+            path=path,
+            content_type=content_type,
+        )
+
+        context = {
+            "department": department,
+            "filename": filename,
+            "session_id": self.session_id,
+            "content_type": content_type,
+        }
+
+        return llm_generate(
+            prompt,
+            system=SYSTEM_PROMPT,
+            context=context,
+        )
+
     def generate(self, path: str) -> GeneratedFile:
         """
         Generate deterministic synthetic content for a file.
@@ -207,6 +276,23 @@ class FileGenerator:
             f"- Status: Internal Simulation\n"
             f"- Classification: Synthetic Demo Data\n"
         )
+
+        if os.getenv("PHANTOMNET_ENABLE_LLM_CONTENT", "").lower() == "true":
+            try:
+                llm_content = self._generate_with_llm(path)
+
+                if validate_generated_content(llm_content):
+                    generated = GeneratedFile(
+                        path=path,
+                        content=llm_content,
+                        file_id=file_id,
+                    )
+                    self._cache[path] = generated
+                    return generated
+            except Exception:
+                # Keep filesystem behavior available when the local LLM
+                # is unavailable or generation fails.
+                pass
 
         generated = GeneratedFile(
             path=path,
