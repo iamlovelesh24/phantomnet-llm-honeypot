@@ -1,493 +1,313 @@
-#
+﻿
+# PhantomNet: Generative Cyber-Deception
 
-# \# PhantomNet: Generative Cyber-Deception
 
-#
+An LLM-powered honeypot and cyber-deception environment developed as part of the Infotact Solutions Generative AI internship.
 
-# An LLM-powered honeypot and cyber-deception environment developed as part of the Infotact Solutions Generative AI internship.
 
-#
+PhantomNet combines a locally hosted Large Language Model (LLM), a fictional corporate environment, and a generative deception filesystem to create realistic synthetic content for controlled cybersecurity research and evaluation.
 
-# PhantomNet combines a locally hosted Large Language Model (LLM) with a synthetic fictional corporate environment and a generative deception filesystem. Its purpose is to create realistic-looking but fictional content for controlled cybersecurity research and evaluation.
 
-#
+## 1. Project Overview
 
-# \## 1. Project Overview
 
-#
+PhantomNet simulates a fictional organization called NexusCore.
 
-# PhantomNet uses generative AI to simulate a fictional organization called \*\*NexusCore\*\*.
 
-#
+The system includes:
 
-# The system combines:
+\- Local LLM-based response generation.
 
-#
+\- Fictional corporate lore and structured context.
 
-# \- Local LLM-based response generation.
+\- Context-aware prompt engineering.
 
-# \- Fictional corporate lore and structured context.
+\- Input and output safety guardrails.
 
-# \- Context-aware prompt engineering.
+\- Generative virtual filesystem.
 
-# \- Input and output safety guardrails.
+\- Synthetic files and deception scenarios.
 
-# \- A generative virtual filesystem.
+\- Prompt consistency and filesystem safety evaluation.
 
-# \- Synthetic files and deception scenarios.
 
-# \- Prompt consistency and filesystem safety evaluation.
+## 2. Technology Stack
 
-#
 
-# All generated organizational information is intended to remain fictional and synthetic.
+| Component | Technology |
 
-#
+|---|---|
 
-# \## 2. Technology Stack
+| Language | Python |
 
-#
+| LLM | Qwen2.5 7B |
 
-# | Component | Technology |
+| Runtime | Ollama |
 
-# |---|---|
+| Filesystem | FUSE |
 
-# | Programming language | Python |
+| Testing | pytest |
 
-# | LLM | Qwen2.5 7B |
+| Version Control | Git and GitHub |
 
-# | LLM runtime | Ollama |
 
-# | LLM integration | Ollama Python client |
+## 3. System Architecture
 
-# | Prompt engineering | Custom system and content prompts |
 
-# | Context management | Python |
+### Member 1 Ã¢â‚¬â€œ LLM Integration
 
-# | Filesystem | FUSE |
 
-# | Testing | pytest |
+\- Local Ollama and Qwen2.5 7B integration.
 
-# | Version control | Git and GitHub |
+\- NexusCore fictional company lore.
 
-#
+\- System and content prompt engineering.
 
-# \## 3. System Architecture
+\- Context-aware response generation.
 
-#
+\- Input and output safety guardrails.
 
-# PhantomNet consists of two main components.
+\- Prompt consistency evaluation.
 
-#
+\- LLM testing and evaluation.
 
-# \### Member 1 – LLM Integration
 
-#
+### Member 2 Ã¢â‚¬â€œ Generative FUSE Filesystem
 
-# Responsible for:
 
-#
+\- Generative virtual filesystem.
 
-# \- Local Ollama and Qwen2.5 7B integration.
+\- Synthetic file and directory generation.
 
-# \- NexusCore fictional company lore.
+\- Path validation and sandbox protection.
 
-# \- System and content prompt engineering.
+\- Read-only deception filesystem.
 
-# \- Context-aware response generation.
+\- Deception scenarios.
 
-# \- Input and output safety guardrails.
+\- Filesystem testing and benchmarking.
 
-# \- Prompt consistency evaluation.
+\- Windows compatibility.
 
-# \- LLM testing and evaluation.
 
-#
+## 4. Repository Structure
 
-# \### Member 2 – Generative FUSE Filesystem
 
-#
+```text
 
-# Responsible for:
+PhantomNet/
 
-#
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ llm/
 
-# \- Generative virtual filesystem.
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ context.py
 
-# \- Synthetic file and directory generation.
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ guardrails.py
 
-# \- Path validation and sandbox protection.
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ lore.py
 
-# \- Read-only deception filesystem behavior.
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ model.py
 
-# \- Deception scenarios.
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ prompts.py
 
-# \- Filesystem testing and benchmarking.
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ deception/
 
-# \- Windows compatibility improvements.
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ file\_generator.py
 
-#
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ fuse\_fs.py
 
-# \## 4. Repository Structure
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ path\_guard.py
 
-#
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ scenarios.py
 
-# ```text
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ evaluation/
 
-# PhantomNet/
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ tests/
 
-# │
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ docs/
 
-# ├── llm/
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ README.md
 
-# │   ├── context.py
+Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ .gitignore
 
-# │   ├── guardrails.py
+```
 
-# │   ├── lore.py
 
-# │   ├── model.py
+## 5. Setup and Installation
 
-# │   └── prompts.py
 
-# │
+### Prerequisites
 
-# ├── deception/
 
-# │   ├── file\_generator.py
+\- Python 3.10 or later.
 
-# │   ├── fuse\_fs.py
+\- Ollama installed.
 
-# │   ├── path\_guard.py
+\- Git.
 
-# │   └── scenarios.py
+\- Qwen2.5 7B model.
 
-# │
 
-# ├── evaluation/
+### Clone the repository
 
-# │   ├── context\_tests.py
 
-# │   ├── llm\_tests.json
+```bash
 
-# │   ├── prompt\_consistency.py
+git clone https://github.com/iamlovelesh24/phantomnet-llm-honeypot.git
 
-# │   └── run\_llm\_tests.py
+cd phantomnet-llm-honeypot
 
-# │
+```
 
-# ├── tests/
 
-# │   ├── benchmark\_fuse\_fs.py
+### Create a virtual environment
 
-# │   ├── test\_file\_generator\_validation.py
 
-# │   ├── test\_fuse\_fs.py
+```bash
 
-# │   ├── test\_guardrails.py
+python -m venv venv
 
-# │   └── test\_path\_guard.py
+```
 
-# │
 
-# ├── docs/
+Windows activation:
 
-# ├── README.md
 
-# └── .gitignore
+```powershell
 
-# ```
+.\\venv\\Scripts\\Activate.ps1
 
-#
+```
 
-# \## 5. Setup and Installation
 
-#
+### Install dependencies
 
-# \### Prerequisites
 
-#
+Install the required Python packages and FUSE binding for your operating system.
 
-# \- Python 3.10 or later.
 
-# \- Ollama installed locally.
+### Download the model
 
-# \- Qwen2.5 7B model.
 
-# \- Git.
+```bash
 
-# \- FUSE-compatible environment for filesystem mounting.
+ollama pull qwen2.5:7b
 
-#
+```
 
-# \### Step 1: Clone the repository
 
-#
+Ensure Ollama is running before starting LLM evaluations.
 
-# ```bash
 
-# git clone https://github.com/iamlovelesh24/phantomnet-llm-honeypot.git
+## 6. Running and Testing
 
-# cd phantomnet-llm-honeypot
 
-# ```
+### Run prompt consistency evaluation
 
-#
 
-# \### Step 2: Create a virtual environment
+```bash
 
-#
+python -m evaluation.prompt\_consistency
 
-# ```bash
+```
 
-# python -m venv venv
 
-# ```
+### Run the complete test suite
 
-#
 
-# Activate it on Windows:
+```bash
 
-#
+python -m pytest -v
 
-# ```powershell
+```
 
-# .\\venv\\Scripts\\Activate.ps1
 
-# ```
+### Run individual tests
 
-#
 
-# \### Step 3: Install dependencies
+```bash
 
-#
+python -m pytest tests/test\_guardrails.py -v
 
-# Install the required Python packages and FUSE binding for your operating system.
+python -m pytest tests/test\_path\_guard.py -v
 
-#
+python -m pytest tests/test\_fuse\_fs.py -v
 
-# The project uses the Ollama Python client and pytest for LLM integration and testing.
+python -m pytest tests/test\_file\_generator\_validation.py -v
 
-#
+```
 
-# \### Step 4: Download the LLM
 
-#
+## 7. Safety and Security
 
-# ```bash
 
-# ollama pull qwen2.5:7b
+### LLM Safety
 
-# ```
 
-#
+\- Input validation.
 
-# Ensure the Ollama service is running locally before executing LLM evaluations.
+\- Output validation.
 
-#
+\- Rejection of prohibited requests.
 
-# \## 6. Running the Project
+\- Standard safety responses for invalid content.
 
-#
 
-# \### LLM Generation
+### Filesystem Safety
 
-#
 
-# The LLM interface is implemented in:
+\- Sandbox-restricted filesystem access.
 
-#
+\- Parent-directory traversal protection.
 
-# ```text
+\- Path validation.
 
-# llm/model.py
+\- Read-only deception filesystem behavior.
 
-# ```
 
-#
+## 8. Evaluation
 
-# The generation pipeline:
 
-#
+PhantomNet includes:
 
-# 1\. Receives a user prompt.
+\- Prompt consistency evaluation.
 
-# 2\. Validates the input using safety guardrails.
+\- Employee and project identity validation.
 
-# 3\. Builds structured context when provided.
+\- Input and output safety testing.
 
-# 4\. Sends the messages to the local Ollama model.
+\- Filesystem path traversal testing.
 
-# 5\. Validates the generated response.
+\- Synthetic file generation validation.
 
-# 6\. Returns the response or a safety message.
+\- FUSE filesystem testing.
 
-#
+\- Filesystem performance benchmarking.
 
-# \### Prompt Consistency Evaluation
 
-#
+## 9. Project Status
 
-# Run:
 
-#
+Implementation, integration, testing, and documentation activities for Weeks 1Ã¢â‚¬â€œ4 have been completed.
 
-# ```bash
 
-# python -m evaluation.prompt\_consistency
+The full automated test suite passed 88 tests, and the final prompt consistency evaluation passed.
 
-# ```
 
-#
+## 10. Contributors
 
-# This evaluates whether generated content remains consistent with the fictional NexusCore environment.
 
-#
+Developed as part of the Infotact Solutions Generative AI Internship.
 
-# \### Running the Test Suite
 
-#
+\- Member 1: LLM Integration and Evaluation.
 
-# Run all tests:
+\- Member 2: Generative FUSE Filesystem and Deception Shell.
 
-#
 
-# ```bash
+## 11. Disclaimer
 
-# python -m pytest tests/ -v
 
-# ```
+PhantomNet is an experimental cyber-deception project intended for controlled research, learning, and testing.
 
-#
 
-# Run individual test modules:
-
-#
-
-# ```bash
-
-# python -m pytest tests/test\_guardrails.py -v
-
-# python -m pytest tests/test\_path\_guard.py -v
-
-# python -m pytest tests/test\_fuse\_fs.py -v
-
-# python -m pytest tests/test\_file\_generator\_validation.py -v
-
-# ```
-
-#
-
-# \## 7. Safety and Security
-
-#
-
-# PhantomNet includes safety mechanisms designed to maintain a controlled synthetic environment.
-
-#
-
-# \### LLM Guardrails
-
-#
-
-# \- Rejects prohibited real-world data requests.
-
-# \- Validates generated output.
-
-# \- Rejects empty or invalid input and output.
-
-# \- Provides a standard safety response when validation fails.
-
-#
-
-# \### Filesystem Protection
-
-#
-
-# \- Restricts filesystem access to the configured sandbox.
-
-# \- Blocks parent-directory traversal.
-
-# \- Rejects invalid and relative paths.
-
-# \- Protects against access outside the sandbox.
-
-# \- Maintains read-only deception filesystem behavior.
-
-#
-
-# \## 8. Evaluation
-
-#
-
-# The project includes evaluation and testing for:
-
-#
-
-# \- Prompt consistency with fictional company lore.
-
-# \- Employee and project identity consistency.
-
-# \- Input and output safety validation.
-
-# \- Filesystem path traversal protection.
-
-# \- Synthetic file generation validation.
-
-# \- FUSE filesystem behavior.
-
-# \- Filesystem performance benchmarking.
-
-#
-
-# \## 9. Project Status
-
-#
-
-# The project has completed major implementation and validation work, including:
-
-#
-
-# \- Local LLM integration.
-
-# \- Context-aware prompt generation.
-
-# \- Fictional corporate environment.
-
-# \- Safety guardrails and tests.
-
-# \- Generative filesystem integration.
-
-# \- Sandbox path validation.
-
-# \- Prompt consistency evaluation.
-
-#
-
-# Final integration and documentation activities are part of the remaining project workflow.
-
-#
-
-# \## 10. Contributors
-
-#
-
-# Developed collaboratively as part of the \*\*Infotact Solutions Generative AI Internship\*\*.
-
-#
-
-# \- Member 1: LLM Integration and Evaluation.
-
-# \- Member 2: Generative FUSE Filesystem and Deception Shell.
-
-#
-
-# \## 11. Disclaimer
-
-#
-
-# PhantomNet is an experimental cyber-deception project intended for controlled research, learning, and testing.
-
-#
-
-# It uses fictional organizational data and synthetic content. It is not intended to access, expose, or interact with real credentials, private records, or production systems.
+It uses fictional organizational data and synthetic content. It is not intended to access, expose, or interact with real credentials, private records, or production systems.
